@@ -8,7 +8,7 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;    /* 세로 레이아웃 */
   min-height: 100vh;
-  max-width: 600px;
+  max-width: 500px;
   margin: 0 auto;
   box-shadow: 0 0 10px rgba(0,0,0,0.15);
   border-radius: 15px;

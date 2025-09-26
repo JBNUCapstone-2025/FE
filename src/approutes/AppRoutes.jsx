@@ -1,23 +1,26 @@
 import React from "react";
-import {Route, Routes} from 'react-router-dom'
+import { Routes, Route, Navigate } from "react-router-dom";
 
-import Main from '../pages/Main';
-import Chat from '../pages/Chat';
-import Test from '../pages/Test';
-
-// test
-import Character from '../components/Character';
+import Main from "../pages/Main";
+import Chat from "../pages/Chat";
+// import Test from "../pages/Test";
+import Login from "../pages/Login";
 
 const AppRoutes = () => {
-    return(
-        <Routes>
-            <Route path = "/" element = {<Main/>}/>
-            <Route path = "/test" element = {<Test/>}/>
-            <Route path = "/character" element = {<Character/>}/>
+  return (
+    <Routes>
+      {/* "/"로 접근하면 자동으로 "/login"으로 이동 */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
-            <Route path = "/chat" element = {<Chat apiBase="http://127.0.0.1:8000"/>}/>
-        </Routes>
-    );
+      <Route path="/login" element={<Login />} />
+      <Route path="/main" element={<Main />} />
+      <Route path="/chat" element={<Chat apiBase="http://127.0.0.1:8000" />} />
+      {/* <Route path="/test" element={<Test />} /> */}
+
+      {/* 잘못된 경로는 로그인으로 */}
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  );
 };
 
 export default AppRoutes;

@@ -6,7 +6,7 @@ const Wrapper = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  max-width: 600px;
+  max-width: 500px;
   margin: 0 auto;
   box-shadow: 0 0 10px rgba(0,0,0,0.15);
   border-radius: 15px;
@@ -19,6 +19,8 @@ const Header = styled.div`
   font-weight: bold;
   text-align: center;
   line-height: 50px;
+  border-top-left-radius : 15px;
+  border-top-right-radius : 15px;
 `;
 
 const MessageList = styled.div`
@@ -48,8 +50,8 @@ const Bubble = styled.div`
 `;
 
 const ChatInput = styled.input`
-  width: 100%;
-  height: 80px;
+  width: calc(100);
+  height: 100px;
   background-color: white;
   border-radius: 15px;
   border: none;
