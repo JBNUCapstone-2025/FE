@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
 import colors from "../styles/colors";
+import logo from "../logo/logo.png"
 
 const Wrapper = styled.div`
   display: flex;
@@ -11,6 +12,7 @@ const Wrapper = styled.div`
   margin: 0 auto;
   box-shadow: 0 0 10px rgba(0,0,0,0.15);
   border-radius: 15px;
+  background: ${colors.main};
 `;
 
 const Container = styled.div`
@@ -21,11 +23,13 @@ const Container = styled.div`
   margin: auto auto;
   display: flex;
   flex-direction: column;
+  background-color: white;
 `;
 
-const Title = styled.p`
-  font-size: 30px;
-  text-align: center;
+const Title = styled.img`
+  width: calc(60%);
+  align-self: center;
+  margin-block: 35px;
 `;
 
 const Input = styled.input`
@@ -61,7 +65,7 @@ const Button = styled.button`
   font-size: 16px;
   font-weight: bold;
   color: white;
-  background: ${({ disabled }) => (disabled ? "#ccc" : colors.button)};
+  background: ${({ disabled }) => (disabled ? "#ccc" : colors.main)};
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 `;
 
@@ -82,7 +86,7 @@ export default function Login() {
   return (
     <Wrapper>
       <Container>
-        <Title>너감보</Title>
+        <Title src = {logo}/>
         <Input
           className="id"
           placeholder="아이디"
