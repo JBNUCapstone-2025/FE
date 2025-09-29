@@ -1,6 +1,16 @@
 // src/pages/Main.jsx
 import React,{useState, useEffect, useRef, useMemo} from "react";
 import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
+
+import logo from "../logo/logo.png";
+import colors from "../styles/colors";
+import { FaAngleLeft } from "react-icons/fa";
+import { FaRegBell } from "react-icons/fa";
+import { FaCircleArrowUp } from "react-icons/fa6";
+
+// ✅ avatars 폴더의 png를 한 번에 import (Vite)
+const avatarModules = import.meta.glob("../img/character/*.png", { eager: true, import: "default" });
 
 const Wrapper = styled.div`
   display: flex;
@@ -10,23 +20,25 @@ const Wrapper = styled.div`
   margin: 0 auto;
   box-shadow: 0 0 10px rgba(0,0,0,0.15);
   border-radius: 15px;
+  background-color: white;
 `;
 
-const Header = styled.div`
-  height: 50px;
-  background: #adf1ad;
-  font-size: 32px;
-  font-weight: bold;
-  text-align: center;
-  line-height: 50px;
-  border-top-left-radius : 15px;
-  border-top-right-radius : 15px;
+const HeaderWrapper = styled.div`
+  display: flex;
+  justify-content: space-around;
+  border-bottom: 1px solid ${colors.text};
+  line-height: 0px;
+  padding: 30px 0;
+`;
+
+const Header = styled.img`
+  width: calc(30%);
 `;
 
 const MessageList = styled.div`
-  flex: 1; /* 나머지 공간 차지 */
+  flex: 1;
   padding: 16px;
-  background: #f0f0f0;
+  background: white;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -38,36 +50,106 @@ const Row = styled.div`
   justify-content: ${p => (p.me ? "flex-end" : "flex-start")};
 `;
 
+const RowInner = styled.div`
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 85%;
+`;
+
+const Avatar = styled.img`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid ${colors.text};
+  padding: 5px;
+  flex: 0 0 32px;
+  object-fit: cover;
+  background: transparent;
+  user-select: none;
+  transform: scaleX(-1);
+  margin-right: 10px;
+`;
+
 const Bubble = styled.div`
-  max-width: 70%;
+  max-width: 100%;
   padding: 10px 14px;
   border-radius: 12px;
-  /* 노란색: 나 / 파란색: LLM */
-  background: ${p => (p.me ? "#ffe55c" : "#dbeafe")};
+  background: ${p => (p.me ? "#dddddd" : colors.main)};
   color: #000;
-  font-size: 15px;
+  font-size: 13px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  word-break: break-word;
+  white-space: pre-wrap;
+`;
+
+const ChatWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  width: calc(100%);
+  line-height: 0;
+  padding-bottom: 20px;
 `;
 
 const ChatInput = styled.input`
-  width: calc(100);
-  height: 100px;
-  background-color: white;
+  width: calc(80%);
+  height: 30px;
+  background-color: ${colors.chatinput};
   border-radius: 15px;
   border: none;
   margin-top: auto;
-  text-align: center;
-  font: bold 15px 'arial';
+  font: bold 13px 'arial';
   color: black;
+  padding: 10px 0;
+  padding-left: 20px;
 `;
+
+// icon
+const TopLeft = styled(FaAngleLeft)`
+  width: 20px;
+  height: auto;
+  color: ${colors.text};
+  cursor: pointer;
+
+  &:hover {
+    color: ${colors.hover};
+  }
+`;
+
+const TopRight = styled(FaRegBell)`
+  width: 20px;
+  height: auto;
+  color: ${colors.text};
+  cursor: pointer;
+
+  &:hover {
+    color: ${colors.hover};
+  }
+`;
+
+const Send = styled(FaCircleArrowUp)`
+  width: 30px;
+  height: auto;
+  color: ${colors.text};
+  cursor: pointer;
+  &:hover{
+    color: ${colors.hover};
+  }
+`
 
 export default function Test({ apiBase = "" }){
   const [messages, setMessages] = useState([
-    {id:1, role:"other", text:"안녕하세요! 메시지를 보내보세요."},
+    {id:1, role:"other", text:"반갑다 멍! 오늘 하루는 어땠나? 멍!"},
   ]);
+
+  const navigate = useNavigate();
+
+  const composingRef = useRef(false);
+
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [, setError] = useState("");
 
   const listRef = useRef(null);
 
@@ -75,6 +157,29 @@ export default function Test({ apiBase = "" }){
     const base = (apiBase || "").trim();
     return base ? `${base}/api/chat` : "/api/chat";
   }, [apiBase]);
+
+  // ✅ 현재 선택된 캐릭터 이름 (localStorage → state)
+  const [character, setCharacter] = useState(() => {
+    return localStorage.getItem("character") || "dog";
+  });
+
+  // ✅ 다른 탭에서 character가 바뀌어도 동기화
+  useEffect(() => {
+    const onStorage = (e) => {
+      if (e.key === "character") {
+        setCharacter(e.newValue || "dog");
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
+
+  // ✅ character명 → 실제 이미지 경로
+  const avatarSrc = useMemo(() => {
+    const key = `../img/character/${character}.png`;
+    const fallback = `../img/character/dog.png`;
+    return avatarModules[key] || avatarModules[fallback] || "";
+  }, [character]);
 
   // 새 메시지마다 자동 스크롤
   useEffect(() => {
@@ -86,6 +191,7 @@ export default function Test({ apiBase = "" }){
   // Enter로 전송
   const onKeyDown = (e) => {
     if (e.key === "Enter") {
+      if (e.isComposing || composingRef.current) return;
       e.preventDefault();
       sendMessage();
     }
@@ -97,7 +203,7 @@ export default function Test({ apiBase = "" }){
 
     setError("");
 
-    // 나의 메시지 추가 (노란)
+    // 나의 메시지 추가
     const myMsg = { id: crypto.randomUUID(), role: "me", text };
     setMessages(prev => [...prev, myMsg]);
     setInput("");
@@ -111,17 +217,17 @@ export default function Test({ apiBase = "" }){
       });
       if (!res.ok) throw new Error(`서버 오류 (${res.status})`);
       const data = await res.json();
-      const answer = data?.answer ?? "응답을 파싱할 수 없어요.";
+      const answer = data?.answer ?? "미안하다멍! 서버에 문제가 있다 멍!";
 
-      // LLM 메시지 추가 (파란)
+      // LLM 메시지 추가 (상대)
       const botMsg = { id: crypto.randomUUID(), role: "other", text: answer };
       setMessages(prev => [...prev, botMsg]);
     } catch (e) {
-      setError(e.message || "네트워크 오류가 발생했어요.");
-      // 오류도 파란 말풍선으로 알려주기 (선택)
+      const msg = e?.message || "네트워크 오류가 발생했다멍!";
+      setError(msg);
       setMessages(prev => [
         ...prev,
-        { id: crypto.randomUUID(), role: "other", text: `⚠️ ${error || "오류가 발생했습니다."}` },
+        { id: crypto.randomUUID(), role: "other", text: `⚠️ ${msg}` },
       ]);
     } finally {
       setLoading(false);
@@ -130,38 +236,60 @@ export default function Test({ apiBase = "" }){
 
   return(
     <Wrapper>
-      <Header>너감보</Header>
+      <HeaderWrapper>
+        <TopLeft onClick={() => navigate("/main")}/>
+        <Header src={logo} alt="logo"/>
+        <TopRight/>
+      </HeaderWrapper>
 
       {/* 대화창 영역 */}
       <MessageList ref={listRef}>
-        {messages.map(m => (
-          <Row key={m.id} me={m.role==="me"}>
-            <Bubble me={m.role==="me"}>{m.text}</Bubble>
-          </Row>
-        ))}
+        {messages.map(m => {
+          const isMe = m.role === "me";
+          if (isMe) {
+            // 나의 말풍선 (오른쪽, 아바타 없음)
+            return (
+              <Row key={m.id} me>
+                <Bubble me>{m.text}</Bubble>
+              </Row>
+            );
+          }
+          // 상대 말풍선 (왼쪽, 아바타 표시)
+          return (
+            <Row key={m.id}>
+              <RowInner>
+                <Avatar src={avatarSrc} alt={`${character} avatar`} />
+                <Bubble>{m.text}</Bubble>
+              </RowInner>
+            </Row>
+          );
+        })}
 
         {/* 타이핑 인디케이터 */}
         {loading && (
           <Row>
-            <Bubble>…</Bubble>
+            <RowInner>
+              <Avatar src={avatarSrc} alt={`${character} avatar`} />
+              <Bubble>…</Bubble>
+            </RowInner>
           </Row>
         )}
       </MessageList>
 
       {/* 입력창 */}
-      <ChatInput
-        placeholder="오늘 하루 어땠어?"
-        value={input}
-        onChange={(e)=>setInput(e.target.value)}
-        onKeyDown={onKeyDown}
-      />
-
-      {/* 에러 띄우기 (옵션) */}
-      {error && (
-        <div style={{padding:"6px 12px", color:"#b91c1c", fontSize:12}}>
-          {error}
-        </div>
-      )}
+      <ChatWrapper>
+        <ChatInput
+          placeholder="오늘 하루 어땠어?"
+          value={input}
+          onChange={(e)=>setInput(e.target.value)}
+          onKeyDown = {onKeyDown}
+          onCompositionStart = {() => (composingRef.current = true)}
+          onCompositionEnd = {() => (composingRef.current = false)}
+        />
+        <Send
+          onClick={sendMessage}
+        />
+      </ChatWrapper>
     </Wrapper>
   );
 }

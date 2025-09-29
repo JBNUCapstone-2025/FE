@@ -49,7 +49,7 @@ const Header = () => {
 
   return (
     <Container>
-      <Icon onClick={() => navigate("/")}><PiAirplaneTakeoffFill/></Icon>
+      <Icon onClick={() => navigate("/main")}><PiAirplaneTakeoffFill/></Icon>
       <Icon><FaCloud/></Icon>
       <Icon><IoIosChatbubbles /></Icon>
       <Icon><FaShoppingCart /></Icon>
