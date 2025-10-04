@@ -158,6 +158,15 @@ export default function Test({ apiBase = "" }){
     return base ? `${base}/api/chat` : "/api/chat";
   }, [apiBase]);
 
+  // ✅ 캐릭터 매핑 (프론트 → 백엔드)
+  const CHARACTER_MAP = {
+    "dog": "강아지",
+    "cat": "고양이",
+    "rabbit": "토끼",
+    "bear": "곰",
+    "fox": "여우"
+  };
+
   // ✅ 현재 선택된 캐릭터 이름 (localStorage → state)
   const [character, setCharacter] = useState(() => {
     return localStorage.getItem("character") || "dog";
@@ -210,10 +219,16 @@ export default function Test({ apiBase = "" }){
     setLoading(true);
 
     try {
+      // ✅ 캐릭터 정보도 함께 전송
+      const characterName = CHARACTER_MAP[character] || "강아지";
+
       const res = await fetch(apiUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sentence: text }),
+        body: JSON.stringify({
+          sentence: text,
+          character: characterName  // 백엔드에 캐릭터 정보 전달
+        }),
       });
       if (!res.ok) throw new Error(`서버 오류 (${res.status})`);
       const data = await res.json();
